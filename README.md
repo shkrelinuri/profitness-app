@@ -1,6 +1,6 @@
-# ProFitness Training Club
+# Lotus Fitness Gym
 
-A responsive public gym website built with Next.js App Router, React, TypeScript, and Tailwind CSS. It includes a web-app manifest and a small service worker for an installable PWA shell.
+A responsive public-facing website and installable PWA for Lotus Gym in Tirana, built with Next.js App Router, React, and TypeScript.
 
 ## Run locally
 
@@ -9,17 +9,33 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000. Use `npm run lint` and `npm run build` to validate changes.
+Open http://localhost:3000. Validate with `npm run lint` and `npm run build`.
 
-## Architecture
+Copy `.env.example` to `.env.local` to configure optional public listing overrides and the contact form. Never commit `.env.local` or put server credentials in `NEXT_PUBLIC_` variables.
 
-- **Web and PWA:** Next.js App Router renders public pages and provides metadata, the web manifest, and service-worker assets.
-- **Backend (next phase):** Supabase Auth and PostgreSQL are the recommended shared backend. Enable row-level security on every member-owned table; keep privileged service-role credentials server-side only. Use Supabase Storage policies for private member uploads.
-- **Native apps (next phase):** Expo/React Native can consume the same Supabase project and typed business contracts. Keep shared validation and domain logic in a small workspace package only when native workflows are added, rather than duplicating a second API.
-- **Secrets:** Never put credentials in source control. When Supabase integration is added, expose only the project URL and anon/publishable key to clients; privileged keys belong in server-only environment variables.
+## Existing architecture
 
-## Current scope and content setup
+- **Web/PWA:** Next.js App Router, server-rendered public pages, manifest, and a service worker for basic offline shell caching.
+- **Public contact delivery:** `/api/contact` validates form data and sends email through Resend only when configured with a server-side API key, a verified sender, and the gym's real receiving inbox.
+- **Backend/auth/database:** None is configured. There is no Supabase/PostgreSQL connection, member authentication, private member data, or admin dashboard in this project.
+- **Native app:** No Expo/iOS/Android project or EAS build setup is present.
 
-The current implementation is the public home page from the supplied brief. Membership, location, hours, email, and review content are intentionally generic because no real club details or verified reviews were supplied. Replace the example contact address (`hello@profitness.example`) and location copy before launch. The membership link starts an email enquiry; it does not create a membership or charge a customer.
+## Verified Lotus Gym information
 
-The service worker caches the app shell and same-origin static resources for basic offline reopening. Photography is served from Unsplash and therefore requires a network connection. A production launch should use approved, locally hosted/licensed imagery, real club details, privacy/terms pages, and the remaining authenticated/member and staff workflows.
+The website uses the supplied business name, Tirana address, phone number, and Plus Code. The map link is a Google Maps search URL built from the supplied address and Plus Code; no coordinates or paid Maps API key are required. The supplied 3.9 rating and 42 reviews are labeled as manually entered from a screenshot, not as a live Google integration. The only supplied hours detail is a 10:00 PM closing time; opening times and days are explicitly unconfirmed.
+
+The rating can be changed or hidden with `NEXT_PUBLIC_LOTUS_RATING_VALUE`, `NEXT_PUBLIC_LOTUS_REVIEW_COUNT`, and `NEXT_PUBLIC_LOTUS_RATING_VISIBLE=false`. The displayed hours note can be changed with `NEXT_PUBLIC_LOTUS_HOURS_NOTE`. These static settings are build/deployment configuration, not an admin dashboard.
+
+## Contact form setup
+
+Set these server-only environment variables using the gym's real details:
+
+- `RESEND_API_KEY`: Resend API key.
+- `CONTACT_INBOX`: an authorized Lotus Gym inbox.
+- `CONTACT_FROM_EMAIL`: a sender address verified with Resend.
+
+Until all three are configured, the form is disabled and the API returns `503`; submissions are not reported as sent. When configured, the API validates and delivers messages, but does not store them in a database. Configure production rate limiting/abuse controls at the hosting edge before accepting public submissions.
+
+## Not yet production-ready
+
+Services, membership plans/prices, classes, and opening schedules have not been supplied, so their pages direct visitors to call rather than claim unverified offerings. The Login page is an explicit notice, not a fake login. There is no member booking, payment, auth, staff/admin dashboard, secure database storage, trainer directory, or native app yet. Privacy and terms pages are clearly marked as not yet provided and need owner/legal review. Replace the illustrative Unsplash hero photo with licensed, gym-approved imagery before launch.

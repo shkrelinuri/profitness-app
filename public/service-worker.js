@@ -1,4 +1,4 @@
-const CACHE_NAME = "profitness-shell-v1";
+const CACHE_NAME = "lotus-shell-v1";
 const APP_SHELL = ["/", "/manifest.webmanifest", "/icon.svg"];
 
 self.addEventListener("install", (event) => {
@@ -17,7 +17,11 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key.startsWith("profitness-shell-") && key !== CACHE_NAME)
+            .filter(
+              (key) =>
+                (key.startsWith("lotus-shell-") || key === "profitness-shell-v1") &&
+                key !== CACHE_NAME,
+            )
             .map((key) => caches.delete(key)),
         ),
       )

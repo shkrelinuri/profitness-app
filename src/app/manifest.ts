@@ -2,13 +2,13 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "ProFitness Training Club",
-    short_name: "ProFitness",
-    description: "A welcoming place to move, build strength, and find your rhythm.",
+    name: "Lotus Fitness Gym",
+    short_name: "Lotus Gym",
+    description: "Find Lotus Gym in central Tirana, Albania.",
     start_url: "/",
     display: "standalone",
-    background_color: "#f5f4ef",
-    theme_color: "#f5f4ef",
+    background_color: "#111310",
+    theme_color: "#111310",
     icons: [
       {
         src: "/icon.svg",
