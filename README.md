@@ -1,36 +1,25 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ProFitness Training Club
 
-## Getting Started
+A responsive public gym website built with Next.js App Router, React, TypeScript, and Tailwind CSS. It includes a web-app manifest and a small service worker for an installable PWA shell.
 
-First, run the development server:
+## Run locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000. Use `npm run lint` and `npm run build` to validate changes.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Architecture
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Web and PWA:** Next.js App Router renders public pages and provides metadata, the web manifest, and service-worker assets.
+- **Backend (next phase):** Supabase Auth and PostgreSQL are the recommended shared backend. Enable row-level security on every member-owned table; keep privileged service-role credentials server-side only. Use Supabase Storage policies for private member uploads.
+- **Native apps (next phase):** Expo/React Native can consume the same Supabase project and typed business contracts. Keep shared validation and domain logic in a small workspace package only when native workflows are added, rather than duplicating a second API.
+- **Secrets:** Never put credentials in source control. When Supabase integration is added, expose only the project URL and anon/publishable key to clients; privileged keys belong in server-only environment variables.
 
-## Learn More
+## Current scope and content setup
 
-To learn more about Next.js, take a look at the following resources:
+The current implementation is the public home page from the supplied brief. Membership, location, hours, email, and review content are intentionally generic because no real club details or verified reviews were supplied. Replace the example contact address (`hello@profitness.example`) and location copy before launch. The membership link starts an email enquiry; it does not create a membership or charge a customer.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The service worker caches the app shell and same-origin static resources for basic offline reopening. Photography is served from Unsplash and therefore requires a network connection. A production launch should use approved, locally hosted/licensed imagery, real club details, privacy/terms pages, and the remaining authenticated/member and staff workflows.
