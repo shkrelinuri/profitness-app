@@ -1,6 +1,6 @@
 # Lotus Fitness Gym
 
-A responsive public-facing website and installable PWA for Lotus Gym in Tirana, built with Next.js App Router, React, and TypeScript.
+A responsive Lotus Gym website and installable PWA, member-account foundation, staff dashboard, and Expo iOS/Android member app.
 
 ## Run locally
 
@@ -9,33 +9,41 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000. Validate with `npm run lint` and `npm run build`.
+Open http://localhost:3000. Validate the website with `npm test`, `npm run lint`, `npm run typecheck`, and `npm run build`.
 
-Copy `.env.example` to `.env.local` to configure optional public listing overrides and the contact form. Never commit `.env.local` or put server credentials in `NEXT_PUBLIC_` variables.
+The Expo app is in `apps/mobile`. Install its dependencies and configure its public Supabase environment variables before running:
 
-## Existing architecture
+```bash
+cd apps/mobile
+npm install
+npm start
+```
 
-- **Web/PWA:** Next.js App Router, server-rendered public pages, manifest, and a service worker for basic offline shell caching.
-- **Public contact delivery:** `/api/contact` validates form data and sends email through Resend only when configured with a server-side API key, a verified sender, and the gym's real receiving inbox.
-- **Backend/auth/database:** None is configured. There is no Supabase/PostgreSQL connection, member authentication, private member data, or admin dashboard in this project.
-- **Native app:** No Expo/iOS/Android project or EAS build setup is present.
+The native app supports verified email/password accounts and displays the member's database-backed membership summary. It never grants access based on a card identifier and cannot unlock the physical door.
 
-## Verified Lotus Gym information
+The mobile dependency audit currently reports unresolved transitive advisories in the Expo SDK 58 tooling tree. `npm audit fix` updates compatible packages, but npm's remaining automatic remediation would downgrade Expo to SDK 51; do not apply that forced downgrade. Review the audit again when Expo publishes compatible fixes and before store submission.
 
-The website uses the supplied business name, Tirana address, phone number, and Plus Code. The map link is a Google Maps search URL built from the supplied address and Plus Code; no coordinates or paid Maps API key are required. The supplied 3.9 rating and 42 reviews are labeled as manually entered from a screenshot, not as a live Google integration. The only supplied hours detail is a 10:00 PM closing time; opening times and days are explicitly unconfirmed.
+## Architecture and setup
 
-The rating can be changed or hidden with `NEXT_PUBLIC_LOTUS_RATING_VALUE`, `NEXT_PUBLIC_LOTUS_REVIEW_COUNT`, and `NEXT_PUBLIC_LOTUS_RATING_VISIBLE=false`. The displayed hours note can be changed with `NEXT_PUBLIC_LOTUS_HOURS_NOTE`. These static settings are build/deployment configuration, not an admin dashboard.
+- **Website/PWA:** Next.js App Router, React, TypeScript, server-rendered public pages, manifest, and offline shell caching.
+- **Native app:** Expo / React Native with Supabase Auth and SecureStore-backed session persistence.
+- **Authentication and database:** Supabase Auth and PostgreSQL. Apply the migrations in `supabase/migrations` in filename order using the Supabase SQL editor or a reviewed deployment workflow.
+- **Public environment:** Copy `.env.example` to `.env.local` for Next.js. Set `NEXT_PUBLIC_SITE_URL` to the deployed origin for staff invitations. For Expo, copy `apps/mobile/.env.example` to `apps/mobile/.env`. The Supabase URL and anon/publishable key are public client configuration; database row-level security and server-side authorization remain mandatory.
+- **Server secret:** Configure `SUPABASE_SERVICE_ROLE_KEY` only in the trusted server environment for staff invitations and trusted membership synchronization. Never put it in a `NEXT_PUBLIC_` or `EXPO_PUBLIC_` variable, source control, or a mobile build.
+- **Email:** Configure Supabase email verification, password reset, and redirect URLs for the deployed website. Staff roles must be provisioned by a trusted administrator; registration creates only a member account.
+- **Initial staff access:** Provision the first staff/admin role through a trusted, audited database administration process. Never let a member edit their own role.
+- **Contact delivery:** `/api/contact` uses Resend only when a server-side API key, verified sender, and authorized receiving inbox are configured. Until then the form is disabled.
 
-## Contact form setup
+## Maksisoft integration status
 
-Set these server-only environment variables using the gym's real details:
+Maksisoft remains authoritative for membership and physical entrance access. Public product information was reviewed, but no official API documentation, SDK, authorized integration method, or credentials were available. The project therefore includes only an unconfigured adapter boundary; it does not invent provider endpoints or send provider requests.
 
-- `RESEND_API_KEY`: Resend API key.
-- `CONTACT_INBOX`: an authorized Lotus Gym inbox.
-- `CONTACT_FROM_EMAIL`: a sender address verified with Resend.
+Staff can link a verified Lotus account to a stable external Maksisoft member identifier. Membership synchronization and digital privileges remain unavailable until Maksisoft supplies an authorized method and the gym configures it. Physical card records and staff operations are retained in the database; no card identifier is used as web/app login proof, and no door-control integration is implemented.
 
-Until all three are configured, the form is disabled and the API returns `503`; submissions are not reported as sent. When configured, the API validates and delivers messages, but does not store them in a database. Configure production rate limiting/abuse controls at the hosting edge before accepting public submissions.
+Before enabling sync, obtain and review Maksisoft's written integration documentation, permitted member identifier semantics, authentication and credential-rotation procedure, membership/status/privilege field mapping, rate limits, retry guidance, and any webhook or polling rules. Confirm that the gym is authorized to access and store each field. Configure server-only credentials and test against a vendor-approved environment before enabling the adapter.
 
-## Not yet production-ready
+## Business information and launch requirements
 
-Services, membership plans/prices, classes, and opening schedules have not been supplied, so their pages direct visitors to call rather than claim unverified offerings. The Login page is an explicit notice, not a fake login. There is no member booking, payment, auth, staff/admin dashboard, secure database storage, trainer directory, or native app yet. Privacy and terms pages are clearly marked as not yet provided and need owner/legal review. Replace the illustrative Unsplash hero photo with licensed, gym-approved imagery before launch.
+The website uses the supplied Lotus Gym name, Tirana address, phone number, and Plus Code. Opening hours, services, class schedules, membership plans/prices, policies, and some ratings were not independently verified; pages avoid presenting missing details as facts. Contact the gym for current information.
+
+Before production launch, the owner should review the privacy policy and terms, provide verified business/membership information, replace illustrative imagery with licensed gym-approved assets, configure Supabase and email delivery, provision staff securely, and complete security/privacy review for the actual deployment.
