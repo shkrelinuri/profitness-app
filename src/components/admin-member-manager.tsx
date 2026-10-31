@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
+import { useLanguage } from "@/components/language-provider";
 
 type GymMembership = {
   id: string;
@@ -38,6 +39,7 @@ type GymMember = {
 };
 
 export default function AdminMemberManager() {
+  const { t } = useLanguage();
   const [members, setMembers] = useState<GymMember[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
@@ -54,16 +56,16 @@ export default function AdminMemberManager() {
       });
       const result = (await response.json()) as { members?: GymMember[]; error?: string };
       if (!response.ok) {
-        setError(result.error ?? "Member search failed.");
+        setError(result.error ?? t("admin.searchFailed"));
         return;
       }
       setMembers(result.members ?? []);
     } catch {
-      setError("Member management service is unavailable.");
+      setError(t("admin.serviceUnavailable"));
     } finally {
       setLoading(false);
     }
-  }, [search]);
+  }, [search, t]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => void loadMembers(), 250);
@@ -82,14 +84,14 @@ export default function AdminMemberManager() {
       });
       const result = (await response.json()) as { error?: string };
       if (!response.ok) {
-        setError(result.error ?? "The requested change failed.");
+        setError(result.error ?? t("admin.changeFailed"));
         return false;
       }
       setNotice(successMessage);
       await loadMembers();
       return true;
     } catch {
-      setError("The member management service is unavailable.");
+      setError(t("admin.serviceUnavailable"));
       return false;
     } finally {
       setPending(false);
@@ -106,7 +108,7 @@ export default function AdminMemberManager() {
         fullName: String(form.get("fullName") ?? ""),
         email: String(form.get("email") ?? ""),
       },
-      "Invitation sent. The member must verify their email before signing in.",
+      t("admin.invitationSent"),
     );
     if (invited) formElement.reset();
   }
@@ -119,24 +121,24 @@ export default function AdminMemberManager() {
     const form = new FormData(event.currentTarget);
     const externalMemberId = String(form.get("externalMemberId") ?? "").trim();
     if (!externalMemberId) {
-      setError("Enter the stable Maksisoft member identifier.");
+      setError(t("admin.enterExternalId"));
       return;
     }
     await postJson(
       "/api/admin/maksisoft/link",
       { operation: "link", memberId, externalMemberId },
-      "Maksisoft member link saved. Membership verification is still pending.",
+      t("admin.linkSaved"),
     );
   }
 
   async function revokeLink(member: GymMember) {
-    if (!window.confirm(`Revoke the Maksisoft member link for ${member.full_name || member.email}?`)) {
+    if (!window.confirm(t("admin.confirmRevoke").replace("{value}", member.full_name || member.email || ""))) {
       return;
     }
     await postJson(
       "/api/admin/maksisoft/link",
       { operation: "revoke", memberId: member.user_id },
-      "Maksisoft link revoked. Digital membership access is suspended.",
+      t("admin.revoked"),
     );
   }
 
@@ -144,7 +146,7 @@ export default function AdminMemberManager() {
     await postJson(
       "/api/admin/maksisoft/sync",
       { memberId },
-      "Membership information synchronized from Maksisoft.",
+      t("admin.synced"),
     );
   }
 
@@ -152,41 +154,47 @@ export default function AdminMemberManager() {
     <section aria-labelledby="admin-members-title" className="admin-manager">
       <div className="admin-member-invite">
         <div>
-          <p className="eyebrow">New member</p>
-          <h2 id="admin-members-title">Invite member</h2>
+          <p className="eyebrow">{t("admin.newMember")}</p>
+          <h2 id="admin-members-title">{t("admin.inviteMember")}</h2>
         </div>
         <form className="admin-invite-form" onSubmit={inviteMember}>
           <label>
-            Full name
+            {t("admin.fullName")}
             <input maxLength={120} name="fullName" required />
           </label>
           <label>
-            Email
+            {t("admin.email")}
             <input maxLength={254} name="email" required type="email" />
           </label>
           <button className="button button-lime" disabled={pending} type="submit">
-            Send verification invite
+            {t("admin.sendInvite")}
           </button>
         </form>
       </div>
 
       <div className="admin-search-bar">
         <label>
-          Search members
+          {t("admin.search")}
           <input
             maxLength={80}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search by member name or email"
+            placeholder={t("admin.searchPlaceholder")}
             value={search}
           />
         </label>
-        <span>{loading ? "Loading…" : `${members.length} member${members.length === 1 ? "" : "s"}`}</span>
+        <span>
+          {loading
+            ? t("admin.loading")
+            : members.length === 1
+              ? t("admin.memberCountSingle")
+              : t("admin.memberCount").replace("{count}", String(members.length))}
+        </span>
       </div>
 
       {error && <p aria-live="polite" className="form-result form-result-error" role="alert">{error}</p>}
       {notice && <p aria-live="polite" className="form-result form-result-success" role="status">{notice}</p>}
       {!loading && !error && members.length === 0 && (
-        <p className="member-empty">No member accounts match this search.</p>
+        <p className="member-empty">{t("admin.noMembers")}</p>
       )}
 
       <div className="admin-member-list">
@@ -195,7 +203,7 @@ export default function AdminMemberManager() {
             <div className="admin-member-heading">
               <div>
                 <span className="footer-label">{member.role.toUpperCase()}</span>
-                <h3>{member.full_name || "Name not set"}</h3>
+                <h3>{member.full_name || t("admin.nameNotSet")}</h3>
                 {member.email && (
                   <a className="admin-member-email" href={`mailto:${member.email}`}>
                     {member.email}
@@ -204,37 +212,34 @@ export default function AdminMemberManager() {
                 <code>{member.user_id}</code>
               </div>
               <span className={`member-status-value status-${member.membership?.status ?? "none"}`}>
-                {member.membership?.status ?? "no membership"}
+                {member.membership?.status ?? t("admin.noMembership")}
               </span>
             </div>
 
-            <section aria-label="Maksisoft member link" className="admin-maksisoft-link">
+            <section aria-label={t("admin.linkSection")} className="admin-maksisoft-link">
               <div className="admin-form-heading">
-                <h4>Maksisoft membership link</h4>
-                <span>
-                  Lotus does not set membership status or privileges. They are verified from
-                  Maksisoft only when an authorized connector is available.
-                </span>
+                <h4>{t("admin.linkSection")}</h4>
+                <span>{t("admin.linkDescription")}</span>
               </div>
               {member.maksisoftLink && (
                 <div className="admin-maksisoft-summary">
                   <span>
-                    Link: <strong>{member.maksisoftLink.status}</strong>
+                    {t("admin.link")} <strong>{member.maksisoftLink.status}</strong>
                   </span>
                   <span>
-                    External member ID: <code>{member.maksisoftLink.external_member_id}</code>
+                    {t("admin.externalId")} <code>{member.maksisoftLink.external_member_id}</code>
                   </span>
                   <span>
-                    Last verified sync:{" "}
+                    {t("admin.lastSync")}{" "}
                     {member.maksisoftLink.last_synced_at
                       ? new Date(member.maksisoftLink.last_synced_at).toLocaleString()
-                      : "not synchronized"}
+                      : t("admin.notSynced")}
                   </span>
                 </div>
               )}
               <form className="admin-link-card-form" onSubmit={(event) => void linkMember(event, member.user_id)}>
                 <label>
-                  Stable Maksisoft member identifier
+                  {t("admin.stableId")}
                   <input
                     autoComplete="off"
                     defaultValue={member.maksisoftLink?.external_member_id ?? ""}
@@ -244,7 +249,7 @@ export default function AdminMemberManager() {
                   />
                 </label>
                 <button className="button button-lime" disabled={pending} type="submit">
-                  {member.maksisoftLink ? "Update member link" : "Link Maksisoft member"}
+                  {member.maksisoftLink ? t("admin.updateLink") : t("admin.linkMember")}
                 </button>
               </form>
               {member.maksisoftLink?.status !== "revoked" && member.maksisoftLink && (
@@ -255,7 +260,7 @@ export default function AdminMemberManager() {
                     onClick={() => void syncMember(member.user_id)}
                     type="button"
                   >
-                    Request membership sync
+                    {t("admin.requestSync")}
                   </button>
                   <button
                     className="button button-quiet"
@@ -263,53 +268,51 @@ export default function AdminMemberManager() {
                     onClick={() => void revokeLink(member)}
                     type="button"
                   >
-                    Revoke link
+                    {t("admin.revoke")}
                   </button>
                 </div>
               )}
             </section>
 
             <div className="admin-membership-summary">
-              <h4>Verified membership snapshot</h4>
+              <h4>{t("admin.snapshot")}</h4>
               {member.membership?.source === "maksisoft" && member.maksisoftLink?.status === "verified" ? (
                 <>
                   <span>
-                    Status: <strong>{member.membership.status}</strong>
+                    {t("admin.status")} <strong>{member.membership.status}</strong>
                   </span>
                   <span>
-                    Starts: {new Date(member.membership.starts_at).toLocaleDateString()}
+                    {t("admin.starts")} {new Date(member.membership.starts_at).toLocaleDateString()}
                   </span>
                   <span>
-                    Expires:{" "}
+                    {t("admin.expires")}{" "}
                     {member.membership.expires_at
                       ? new Date(member.membership.expires_at).toLocaleDateString()
-                      : "not provided"}
+                      : t("admin.notProvided")}
                   </span>
                   <span>
-                    Digital privileges:{" "}
+                    {t("admin.privileges")}{" "}
                     {member.membership.privileges.length > 0
                       ? member.membership.privileges.join(", ")
-                      : "none"}
+                      : t("admin.none")}
                   </span>
                 </>
               ) : (
                 <p className="member-empty">
-                  No verified Maksisoft membership data is available. Digital membership access
-                  remains disabled.
+                  {t("admin.noVerifiedData")}
                 </p>
               )}
               {member.maksisoftLink?.last_sync_error && (
                 <p className="form-result form-result-error">
-                  The last synchronization reported an integration error. Check server logs or
-                  contact the integration administrator.
+                  {t("admin.syncError")}
                 </p>
               )}
             </div>
 
             <details className="admin-audit-details">
-              <summary>Administrative audit history ({member.auditLogs.length})</summary>
+              <summary>{t("admin.audit").replace("{count}", String(member.auditLogs.length))}</summary>
               {member.auditLogs.length === 0 ? (
-                <p className="member-empty">No member or integration changes recorded.</p>
+                <p className="member-empty">{t("admin.noChanges")}</p>
               ) : (
                 <ul>
                   {member.auditLogs.map((log) => (

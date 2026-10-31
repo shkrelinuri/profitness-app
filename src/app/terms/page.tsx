@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { LocalizedText } from "@/components/language-provider";
 import StatusPage from "@/components/status-page";
 
 export const metadata: Metadata = {
@@ -9,12 +10,12 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   return (
     <StatusPage
-      eyebrow="Terms"
-      title="Terms of use"
-      description="Website terms have not yet been supplied by Lotus Gym."
-      notice="Membership terms, pricing, and facility rules are not published here. Contact the gym directly for current information. Formal website terms should be reviewed and approved before launch."
+      eyebrow={<LocalizedText id="terms.kicker" />}
+      title={<LocalizedText id="terms.title" />}
+      description={<LocalizedText id="terms.description" />}
+      notice={<LocalizedText id="terms.notice" />}
       actionHref="tel:+355693055396"
-      actionLabel="Call +355 69 305 5396"
+      actionLabel={<LocalizedText id="status.call" />}
     />
   );
 }

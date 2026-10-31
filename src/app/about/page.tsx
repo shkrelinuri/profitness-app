@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { LocalizedText } from "@/components/language-provider";
 import { gym } from "@/lib/gym";
 
 export const metadata: Metadata = {
@@ -12,33 +13,29 @@ export default function AboutPage() {
   return (
     <main className="about-page">
       <section className="about-hero">
-        <p className="eyebrow"><span /> {gym.category} · Tirana, Albania</p>
+        <p className="eyebrow"><span /><LocalizedText id="home.kicker" /></p>
         <h1>
-          A new
+          <LocalizedText id="about.heading" />
           <br />
-          <em>start begins here.</em>
+          <LocalizedText as="em" id="about.highlight" />
         </h1>
-        <p>
-          Lotus Gym is located on Bulevardi Zogu I in central Tirana. For
-          current information about training and memberships, speak with the
-          team directly.
-        </p>
+        <LocalizedText as="p" id="about.description" />
         <Link className="button button-lime" href="/contact">
-          Find Lotus Gym <span aria-hidden="true">↗</span>
+          <LocalizedText id="about.find" /> <span aria-hidden="true">↗</span>
         </Link>
       </section>
       <section className="about-facts">
         <div>
-          <span className="footer-label">LOCATION</span>
+          <span className="footer-label"><LocalizedText id="about.location" /></span>
           <p>{gym.address.full}</p>
         </div>
         <div>
-          <span className="footer-label">PHONE</span>
+          <span className="footer-label"><LocalizedText id="contact.phone" /></span>
           <a href={`tel:${gym.phone.href}`}>{gym.phone.display}</a>
         </div>
         <div>
-          <span className="footer-label">BUSINESS CATEGORY</span>
-          <p>{gym.category}</p>
+          <span className="footer-label"><LocalizedText id="about.category" /></span>
+          <p><LocalizedText id="about.categoryName" /></p>
         </div>
       </section>
     </main>

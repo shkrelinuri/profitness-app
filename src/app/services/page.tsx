@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { LocalizedText } from "@/components/language-provider";
 import StatusPage from "@/components/status-page";
 
 export const metadata: Metadata = {
@@ -10,10 +11,10 @@ export const metadata: Metadata = {
 export default function ServicesPage() {
   return (
     <StatusPage
-      eyebrow="Explore Lotus"
-      title="Services"
-      description="We want you to have accurate information before you visit."
-      notice="Lotus Gym has not yet provided a verified list of services or facilities for this website. Call the gym to ask what is currently available."
+      eyebrow={<LocalizedText id="services.kicker" />}
+      title={<LocalizedText id="services.title" />}
+      description={<LocalizedText id="services.description" />}
+      notice={<LocalizedText id="services.notice" />}
     />
   );
 }

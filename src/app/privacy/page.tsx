@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { LocalizedText } from "@/components/language-provider";
 import StatusPage from "@/components/status-page";
 
 export const metadata: Metadata = {
@@ -10,12 +11,12 @@ export const metadata: Metadata = {
 export default function PrivacyPage() {
   return (
     <StatusPage
-      eyebrow="Privacy"
-      title="Privacy information"
-      description="A complete privacy policy has not yet been provided by Lotus Gym."
-      notice="Do not submit sensitive personal information through this website. The optional contact form is unavailable until a verified delivery inbox and sender are configured. A formal privacy notice must be approved before collecting member or contact data."
+      eyebrow={<LocalizedText id="privacy.kicker" />}
+      title={<LocalizedText id="privacy.title" />}
+      description={<LocalizedText id="privacy.description" />}
+      notice={<LocalizedText id="privacy.notice" />}
       actionHref="/contact"
-      actionLabel="View contact details"
+      actionLabel={<LocalizedText id="privacy.action" />}
     />
   );
 }

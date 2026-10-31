@@ -1,5 +1,5 @@
-const CACHE_NAME = "lotus-shell-v1";
-const APP_SHELL = ["/", "/manifest.webmanifest", "/icon.svg"];
+const CACHE_NAME = "lotus-shell-v3";
+const APP_SHELL = ["/", "/manifest.webmanifest", "/lotuslogo.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

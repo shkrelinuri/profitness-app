@@ -32,7 +32,7 @@ The mobile dependency audit currently reports unresolved transitive advisories i
 - **Server secret:** Configure `SUPABASE_SERVICE_ROLE_KEY` only in the trusted server environment for staff invitations and trusted membership synchronization. Never put it in a `NEXT_PUBLIC_` or `EXPO_PUBLIC_` variable, source control, or a mobile build.
 - **Email:** Configure Supabase email verification, password reset, and redirect URLs for the deployed website. Staff roles must be provisioned by a trusted administrator; registration creates only a member account.
 - **Initial staff access:** Provision the first staff/admin role through a trusted, audited database administration process. Never let a member edit their own role.
-- **Contact delivery:** `/api/contact` uses Resend only when a server-side API key, verified sender, and authorized receiving inbox are configured. Until then the form is disabled.
+- **Contact delivery:** `/api/contact` sends validated submissions to Formspree using the server-side `FORMSPREE_FORM_ID`. Create a Formspree account and form, then add its form ID to `.env.local` and the deployment environment. Until configured, the website form stays disabled. The form ID is not a secret, but keeping it server-side lets the application validate submissions and apply its spam checks before forwarding them.
 
 ## Maksisoft integration status
 

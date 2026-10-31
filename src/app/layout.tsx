@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import ServiceWorkerRegistration from "./service-worker-registration";
+import { LanguageProvider, LocalizedText } from "@/components/language-provider";
 import SiteFooter from "@/components/site-footer";
 import SiteHeader from "@/components/site-header";
 
@@ -10,12 +11,12 @@ export const metadata: Metadata = {
     template: "%s | Lotus Fitness Gym",
   },
   description:
-    "Find Lotus Gym at Bulevardi Zogu I 1, central Tirana. Call for verified opening hours, current services, and membership information.",
+    "Find Lotus Gym at Bulevardi Zogu I 1 in central Tirana. Open Monday–Saturday 9:00 AM–11:00 PM and Sunday 9:00 AM–4:00 PM.",
   applicationName: "Lotus Fitness Gym",
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/icon.svg",
-    apple: "/icon.svg",
+    icon: "/lotuslogo.png",
+    apple: "/lotuslogo.png",
   },
   openGraph: {
     title: "Lotus Fitness Gym | Tirana, Albania",
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: "#111310",
+  themeColor: "#100b0d",
   width: "device-width",
   initialScale: 1,
 };
@@ -44,13 +45,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" data-scroll-behavior="smooth">
       <body>
         <ServiceWorkerRegistration />
-        <a className="skip-link" href="#main-content">Skip to content</a>
-        <SiteHeader />
-        <div id="main-content">{children}</div>
-        <SiteFooter />
+        <LanguageProvider>
+          <a className="skip-link" href="#main-content">
+            <LocalizedText id="navigation.skip" />
+          </a>
+          <SiteHeader />
+          <div id="main-content">{children}</div>
+          <SiteFooter />
+        </LanguageProvider>
       </body>
     </html>
   );

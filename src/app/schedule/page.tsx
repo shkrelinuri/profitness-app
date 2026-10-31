@@ -1,21 +1,22 @@
 import type { Metadata } from "next";
+import { LocalizedText } from "@/components/language-provider";
 import StatusPage from "@/components/status-page";
 
 export const metadata: Metadata = {
   title: "Schedule",
   description:
-    "Contact Lotus Gym in Tirana to confirm opening times and class schedules.",
+    "Lotus Gym is open Monday to Saturday from 9:00 AM to 11:00 PM and Sunday from 9:00 AM to 4:00 PM. Contact the gym for class schedules.",
 };
 
 export default function SchedulePage() {
   return (
     <StatusPage
-      eyebrow="Plan your visit"
-      title="Schedule"
-      description="Opening times and class information can change. Please check directly with the gym."
-      notice="Only a 10:00 PM closing time was visible in the supplied listing. Opening hours, weekly schedules, and class times have not been confirmed. Call before visiting."
+      eyebrow={<LocalizedText id="schedule.kicker" />}
+      title={<LocalizedText id="schedule.title" />}
+      description={<LocalizedText id="schedule.description" />}
+      notice={<LocalizedText id="schedule.notice" />}
       actionHref="tel:+355693055396"
-      actionLabel="Call +355 69 305 5396"
+      actionLabel={<LocalizedText id="status.call" />}
     />
   );
 }

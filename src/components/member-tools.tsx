@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useLanguage } from "@/components/language-provider";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type GymClass = {
@@ -43,6 +44,7 @@ export default function MemberTools({
   canEditAccount: boolean;
 }) {
   const router = useRouter();
+  const { language, t } = useLanguage();
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState<string | null>(null);
   const [name, setName] = useState(fullName);
@@ -50,16 +52,16 @@ export default function MemberTools({
   async function reserveClass(classId: string) {
     const client = createSupabaseBrowserClient();
     if (!client) {
-      setMessage("Member services are not configured.");
+      setMessage(t("memberTools.notConfigured"));
       return;
     }
     setPending(classId);
     setMessage("");
     const { error } = await client.rpc("reserve_gym_class", { p_class_id: classId });
     if (error) {
-      setMessage("Reservation failed. Check your membership and class availability.");
+      setMessage(t("memberTools.reserveFailed"));
     } else {
-      setMessage("Your class reservation is confirmed.");
+      setMessage(t("memberTools.confirmed"));
       router.refresh();
     }
     setPending(null);
@@ -68,7 +70,7 @@ export default function MemberTools({
   async function cancelReservation(reservationId: string) {
     const client = createSupabaseBrowserClient();
     if (!client) {
-      setMessage("Member services are not configured.");
+      setMessage(t("memberTools.notConfigured"));
       return;
     }
     setPending(reservationId);
@@ -77,9 +79,9 @@ export default function MemberTools({
       p_reservation_id: reservationId,
     });
     if (error) {
-      setMessage("The reservation could not be cancelled.");
+      setMessage(t("memberTools.cancelFailed"));
     } else {
-      setMessage("Reservation cancelled.");
+      setMessage(t("memberTools.cancelled"));
       router.refresh();
     }
     setPending(null);
@@ -89,7 +91,7 @@ export default function MemberTools({
     event.preventDefault();
     const client = createSupabaseBrowserClient();
     if (!client) {
-      setMessage("Member services are not configured.");
+      setMessage(t("memberTools.notConfigured"));
       return;
     }
     setPending("profile");
@@ -100,9 +102,9 @@ export default function MemberTools({
       .select("user_id")
       .single();
     if (error) {
-      setMessage("Profile changes could not be saved.");
+      setMessage(t("memberTools.profileFailed"));
     } else {
-      setMessage("Profile updated.");
+      setMessage(t("memberTools.profileUpdated"));
       router.refresh();
     }
     setPending(null);
@@ -124,15 +126,16 @@ export default function MemberTools({
       <section aria-labelledby="booking-title" className="member-panel">
         <div className="member-panel-heading">
           <div>
-            <p className="eyebrow">Your classes</p>
-            <h2 id="booking-title">Bookings</h2>
+            <p className="eyebrow">{t("memberTools.classes")}</p>
+            <h2 id="booking-title">{t("memberTools.bookings")}</h2>
           </div>
-          <span className="member-panel-count">{activeReservations.length} reserved</span>
+          <span className="member-panel-count">
+            {t("memberTools.reservedCount").replace("{count}", String(activeReservations.length))}
+          </span>
         </div>
         {!canBookClasses ? (
           <p className="member-empty">
-            Class booking is not included in your current membership. Contact
-            Lotus Gym if you think this is incorrect.
+            {t("memberTools.bookingUnavailable")}
           </p>
         ) : (
           <>
@@ -142,11 +145,11 @@ export default function MemberTools({
                 return (
                   <article className="member-booking" key={reservation.id}>
                     <div>
-                      <strong>{gymClass?.title ?? "Reserved class"}</strong>
+                      <strong>{gymClass?.title ?? t("memberTools.reservedClass")}</strong>
                       <span>
                         {gymClass
-                          ? new Date(gymClass.starts_at).toLocaleString()
-                          : "Class details are not available"}
+                          ? new Date(gymClass.starts_at).toLocaleString(language === "sq" ? "sq-AL" : "en-US")
+                          : t("memberTools.classUnavailable")}
                       </span>
                     </div>
                     <button
@@ -155,20 +158,20 @@ export default function MemberTools({
                       onClick={() => cancelReservation(reservation.id)}
                       type="button"
                     >
-                      Cancel
+                      {t("memberTools.cancel")}
                     </button>
                   </article>
                 );
               })}
               {activeReservations.length === 0 && (
-                <p className="member-empty">You have no upcoming class reservations.</p>
+                <p className="member-empty">{t("memberTools.noReservations")}</p>
               )}
             </div>
             <div className="member-class-list">
-              <h3>Available sessions</h3>
+              <h3>{t("memberTools.availableSessions")}</h3>
               {classes.length === 0 && (
                 <p className="member-empty">
-                  No upcoming classes have been published by the gym.
+                  {t("memberTools.noClasses")}
                 </p>
               )}
               {classes.map((gymClass) => {
@@ -179,7 +182,7 @@ export default function MemberTools({
                   <article className="member-booking" key={gymClass.id}>
                     <div>
                       <strong>{gymClass.title}</strong>
-                      <span>{new Date(gymClass.starts_at).toLocaleString()}</span>
+                      <span>{new Date(gymClass.starts_at).toLocaleString(language === "sq" ? "sq-AL" : "en-US")}</span>
                     </div>
                     <button
                       className="button button-lime"
@@ -187,7 +190,7 @@ export default function MemberTools({
                       onClick={() => reserveClass(gymClass.id)}
                       type="button"
                     >
-                      {isReserved ? "Reserved" : "Reserve"}
+                      {isReserved ? t("memberTools.reserved") : t("memberTools.reserve")}
                     </button>
                   </article>
                 );
@@ -200,17 +203,17 @@ export default function MemberTools({
       <section aria-labelledby="workout-title" className="member-panel">
         <div className="member-panel-heading">
           <div>
-            <p className="eyebrow">Your training</p>
-            <h2 id="workout-title">Workout plans</h2>
+            <p className="eyebrow">{t("memberTools.training")}</p>
+            <h2 id="workout-title">{t("memberTools.workoutPlans")}</h2>
           </div>
         </div>
         {!canViewWorkouts ? (
           <p className="member-empty">
-            Workout plans are not included in your current membership.
+            {t("memberTools.workoutsUnavailable")}
           </p>
         ) : workouts.length === 0 ? (
           <p className="member-empty">
-            No workout plans have been assigned to your account yet.
+            {t("memberTools.noWorkouts")}
           </p>
         ) : (
           <div className="workout-list">
@@ -218,7 +221,12 @@ export default function MemberTools({
               <article className="workout-card" key={workout.id}>
                 <h3>{workout.title}</h3>
                 <p>{workout.description}</p>
-                <span>Assigned {new Date(workout.created_at).toLocaleDateString()}</span>
+                <span>
+                  {t("memberTools.assigned").replace(
+                    "{value}",
+                    new Date(workout.created_at).toLocaleDateString(language === "sq" ? "sq-AL" : "en-US"),
+                  )}
+                </span>
               </article>
             ))}
           </div>
@@ -228,18 +236,18 @@ export default function MemberTools({
       <section aria-labelledby="settings-title" className="member-panel" id="account-settings">
         <div className="member-panel-heading">
           <div>
-            <p className="eyebrow">Your details</p>
-            <h2 id="settings-title">Account settings</h2>
+            <p className="eyebrow">{t("memberTools.details")}</p>
+            <h2 id="settings-title">{t("memberTools.settings")}</h2>
           </div>
         </div>
         {!canEditAccount ? (
           <p className="member-empty">
-            Account settings are not available under the current membership privileges.
+            {t("memberTools.settingsUnavailable")}
           </p>
         ) : (
           <form className="member-settings-form" onSubmit={saveProfile}>
             <label>
-              Full name
+              {t("memberTools.fullName")}
               <input
                 maxLength={120}
                 onChange={(event) => setName(event.target.value)}
@@ -248,12 +256,12 @@ export default function MemberTools({
               />
             </label>
             <button className="button button-lime" disabled={pending === "profile"} type="submit">
-              Save profile
+              {t("memberTools.save")}
             </button>
           </form>
         )}
         <button className="button button-quiet member-signout" onClick={signOut} type="button">
-          Sign out
+          {t("memberTools.signOut")}
         </button>
       </section>
       {message && <p aria-live="polite" className="member-feedback" role="status">{message}</p>}

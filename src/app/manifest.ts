@@ -7,13 +7,13 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Find Lotus Gym in central Tirana, Albania.",
     start_url: "/",
     display: "standalone",
-    background_color: "#111310",
-    theme_color: "#111310",
+    background_color: "#100b0d",
+    theme_color: "#100b0d",
     icons: [
       {
-        src: "/icon.svg",
-        sizes: "any",
-        type: "image/svg+xml",
+        src: "/lotuslogo.png",
+        sizes: "150x150",
+        type: "image/png",
         purpose: "any",
       },
     ],

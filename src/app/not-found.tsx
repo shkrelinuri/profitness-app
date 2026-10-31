@@ -1,20 +1,19 @@
 import Link from "next/link";
+import { LocalizedText } from "@/components/language-provider";
 
 export default function NotFound() {
   return (
     <main className="status-page">
       <div className="status-content">
-        <p className="eyebrow"><span /> 404 · PAGE NOT FOUND</p>
+        <p className="eyebrow"><span /><LocalizedText id="notFound.kicker" /></p>
         <h1>
-          Let&apos;s get
+          <LocalizedText id="notFound.first" />
           <br />
-          <em>you back.</em>
+          <LocalizedText as="em" id="notFound.highlight" />
         </h1>
-        <p className="status-description">
-          That page is not here. Head back to the Lotus Gym home page.
-        </p>
+        <LocalizedText as="p" className="status-description" id="notFound.description" />
         <Link className="button button-lime" href="/">
-          Back to home <span aria-hidden="true">↗</span>
+          <LocalizedText id="notFound.home" /> <span aria-hidden="true">↗</span>
         </Link>
       </div>
     </main>

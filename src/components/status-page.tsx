@@ -1,12 +1,13 @@
 import Link from "next/link";
+import { LocalizedText } from "@/components/language-provider";
 
 type StatusPageProps = {
-  eyebrow: string;
-  title: string;
-  description: string;
-  notice: string;
+  eyebrow: React.ReactNode;
+  title: React.ReactNode;
+  description: React.ReactNode;
+  notice: React.ReactNode;
   actionHref?: string;
-  actionLabel?: string;
+  actionLabel?: React.ReactNode;
 };
 
 export default function StatusPage({
@@ -15,7 +16,7 @@ export default function StatusPage({
   description,
   notice,
   actionHref = "/contact",
-  actionLabel = "Contact Lotus Gym",
+  actionLabel = <LocalizedText id="status.contact" />,
 }: StatusPageProps) {
   return (
     <main className="status-page">

@@ -19,12 +19,11 @@ export const gym = {
     display: "+355 69 305 5396",
     href: "+355693055396",
   },
-  plusCode: "8RP8+4J Tirane, Albania",
   mapsUrl:
-    "https://www.google.com/maps/search/?api=1&query=Bulevardi%20Zogu%20I%201%2C%20Qendra%20Trektare%20Tirana%20%28QTT%29%2C%20kati%20i%20dyte%2C%20Tirana%2C%201001%2C%20Albania%208RP8%2B4J%20Tirane%2C%20Albania",
-  hoursNote:
-    process.env.NEXT_PUBLIC_LOTUS_HOURS_NOTE?.trim() ||
-    "The supplied listing shows a 10:00 PM closing time. Opening times and the weekly schedule have not been confirmed; please call before visiting.",
+    "https://www.google.com/maps/place/Lotus+Gym/@41.3353451,19.8166053,17z/data=!3m1!4b1!4m6!3m5!1s0x135031e70ac44c99:0x266f4a5e5615b55f!8m2!3d41.3353451!4d19.8166053!16s%2Fg%2F11h5n5d6cq?entry=ttu&g_ep=EgoyMDI2MTAyMC4wIKXMDSoASAFQAw%3D%3D",
+  mapsEmbedUrl:
+    "https://maps.google.com/maps?q=41.3353451%2C19.8166053&z=17&output=embed",
+  hoursNote: "Mon–Sat: 9:00 AM–11:00 PM · Sun: 9:00 AM–4:00 PM",
   rating: {
     value: Number.isFinite(ratingValue)
       ? Math.min(5, Math.max(0, ratingValue))

@@ -1,3 +1,5 @@
+import { getFormspreeFormId } from "@/lib/contact";
+
 type ContactSubmission = {
   name: string;
   email: string;
@@ -23,25 +25,9 @@ function isContactSubmission(value: unknown): value is ContactSubmission {
   );
 }
 
-function escapeHtml(value: string) {
-  return value.replace(/[&<>"']/g, (character) => {
-    const entities: Record<string, string> = {
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;",
-    };
-    return entities[character];
-  });
-}
-
 export async function POST(request: Request) {
-  const apiKey = process.env.RESEND_API_KEY;
-  const recipient = process.env.CONTACT_INBOX;
-  const sender = process.env.CONTACT_FROM_EMAIL;
-
-  if (!apiKey || !recipient || !sender) {
+  const formId = getFormspreeFormId();
+  if (!formId) {
     return Response.json(
       { error: "The online contact form is not configured. Please call the gym." },
       { status: 503 },
@@ -113,26 +99,21 @@ export async function POST(request: Request) {
     );
   }
 
-  const escapedName = escapeHtml(name);
-  const escapedEmail = escapeHtml(email);
-  const escapedSubject = escapeHtml(subject);
-  const escapedMessage = escapeHtml(message).replace(/\r?\n/g, "<br>");
-
   let delivery: Response;
   try {
-    delivery = await fetch("https://api.resend.com/emails", {
+    delivery = await fetch(`https://formspree.io/f/${formId}`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
+        Accept: "application/json",
       },
       body: JSON.stringify({
-        from: sender,
-        to: [recipient],
-        reply_to: email,
-        subject: `Lotus Gym website enquiry: ${subject}`,
-        text: `From: ${name} <${email}>\nSubject: ${subject}\n\n${message}`,
-        html: `<p><strong>From:</strong> ${escapedName} &lt;${escapedEmail}&gt;</p><p><strong>Subject:</strong> ${escapedSubject}</p><p>${escapedMessage}</p>`,
+        name,
+        email,
+        _replyto: email,
+        _subject: `Lotus Gym website enquiry: ${subject}`,
+        subject,
+        message,
       }),
       signal: AbortSignal.timeout(10_000),
     });

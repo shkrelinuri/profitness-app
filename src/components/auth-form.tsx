@@ -3,13 +3,15 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import { useLanguage } from "@/components/language-provider";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import type { TranslationKey } from "@/lib/translations";
 
 type AuthMode = "login" | "register" | "reset" | "new-password";
 
-const messages: Record<string, string> = {
-  auth_not_configured: "Member accounts are not configured yet.",
-  verification_failed: "The verification link could not be used. Request a new one.",
+const errorTranslationKeys: Record<string, TranslationKey> = {
+  auth_not_configured: "auth.notConfigured",
+  verification_failed: "auth.verificationFailed",
 };
 
 export default function AuthForm({
@@ -20,9 +22,12 @@ export default function AuthForm({
   errorCode?: string;
 }) {
   const router = useRouter();
+  const { t } = useLanguage();
   const [pending, setPending] = useState(false);
   const [feedback, setFeedback] = useState(
-    errorCode ? messages[errorCode] ?? "Sign-in could not be completed." : "",
+    errorCode
+      ? t(errorTranslationKeys[errorCode] ?? "auth.genericError")
+      : "",
   );
   const [success, setSuccess] = useState(false);
 
@@ -37,7 +42,7 @@ export default function AuthForm({
     const password = String(formData.get("password") ?? "");
     const client = createSupabaseBrowserClient();
     if (!client) {
-      setFeedback("Member accounts are not configured. Please contact Lotus Gym.");
+      setFeedback(t("auth.contactForHelp"));
       setPending(false);
       return;
     }
@@ -46,7 +51,7 @@ export default function AuthForm({
       if (mode === "register") {
         const fullName = String(formData.get("fullName") ?? "").trim();
         if (fullName.length < 1 || fullName.length > 120 || password.length < 12) {
-          setFeedback("Enter your name and choose a password with at least 12 characters.");
+          setFeedback(t("auth.invalidRegister"));
           return;
         }
 
@@ -63,14 +68,14 @@ export default function AuthForm({
           return;
         }
         setSuccess(true);
-        setFeedback("Check your inbox for a verification link. Staff will activate membership after verification.");
+        setFeedback(t("auth.verifyEmail"));
         return;
       }
 
       if (mode === "login") {
         const { error } = await client.auth.signInWithPassword({ email, password });
         if (error) {
-          setFeedback("Sign-in failed. Check your email and password, then try again.");
+          setFeedback(t("auth.signInFailed"));
           return;
         }
         router.replace("/account");
@@ -83,27 +88,27 @@ export default function AuthForm({
           redirectTo: `${window.location.origin}/auth/callback?next=/account/reset-password`,
         });
         if (error) {
-          setFeedback("We could not send a password reset email. Try again later.");
+          setFeedback(t("auth.resetFailed"));
           return;
         }
         setSuccess(true);
-        setFeedback("If an account exists for that email, a password reset link has been sent.");
+        setFeedback(t("auth.resetSent"));
         return;
       }
 
       if (password.length < 12) {
-        setFeedback("Choose a password with at least 12 characters.");
+        setFeedback(t("auth.passwordShort"));
         return;
       }
       const { error } = await client.auth.updateUser({ password });
       if (error) {
-        setFeedback("Your password could not be changed. Request a new reset link and try again.");
+        setFeedback(t("auth.passwordFailed"));
         return;
       }
       setSuccess(true);
-      setFeedback("Password updated. You can now sign in.");
+      setFeedback(t("auth.passwordUpdated"));
     } catch {
-      setFeedback("The request could not be completed. Please try again.");
+      setFeedback(t("auth.requestFailed"));
     } finally {
       setPending(false);
     }
@@ -116,13 +121,13 @@ export default function AuthForm({
     <form className="auth-form" onSubmit={handleSubmit}>
       {mode === "register" && (
         <label>
-          Full name
+          {t("auth.fullName")}
           <input autoComplete="name" maxLength={120} name="fullName" required />
         </label>
       )}
       {showEmail && (
         <label>
-          Email
+          {t("auth.email")}
           <input
             autoComplete="email"
             maxLength={254}
@@ -134,7 +139,7 @@ export default function AuthForm({
       )}
       {showPassword && (
         <label>
-          {mode === "new-password" ? "New password" : "Password"}
+          {mode === "new-password" ? t("auth.newPassword") : t("auth.password")}
           <input
             autoComplete={mode === "login" ? "current-password" : "new-password"}
             minLength={mode === "login" ? undefined : 12}
@@ -154,33 +159,36 @@ export default function AuthForm({
         </p>
       )}
       <button className="button button-lime" disabled={pending} type="submit">
-        {pending ? "Please wait…" : authButtonText(mode)}
+        {pending ? t("auth.wait") : authButtonText(mode, t)}
         <span aria-hidden="true">↗</span>
       </button>
       <nav aria-label="Account links" className="auth-links">
         {mode === "login" && (
           <>
-            <Link href="/register">Create member account</Link>
-            <Link href="/reset-password">Forgot password?</Link>
+            <Link href="/register">{t("auth.createLink")}</Link>
+            <Link href="/reset-password">{t("auth.forgot")}</Link>
           </>
         )}
-        {mode === "register" && <Link href="/login">Already have an account? Sign in</Link>}
-        {mode === "reset" && <Link href="/login">Back to sign in</Link>}
-        {mode === "new-password" && <Link href="/login">Back to sign in</Link>}
+        {mode === "register" && <Link href="/login">{t("auth.already")}</Link>}
+        {mode === "reset" && <Link href="/login">{t("auth.back")}</Link>}
+        {mode === "new-password" && <Link href="/login">{t("auth.back")}</Link>}
       </nav>
     </form>
   );
 }
 
-function authButtonText(mode: AuthMode) {
+function authButtonText(
+  mode: AuthMode,
+  t: (key: TranslationKey) => string,
+) {
   switch (mode) {
     case "login":
-      return "Sign in";
+      return t("auth.signIn");
     case "register":
-      return "Create account";
+      return t("auth.create");
     case "reset":
-      return "Send reset link";
+      return t("auth.sendReset");
     case "new-password":
-      return "Update password";
+      return t("auth.updatePassword");
   }
 }

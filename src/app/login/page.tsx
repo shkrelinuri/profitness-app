@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { LocalizedText } from "@/components/language-provider";
 import AuthForm from "@/components/auth-form";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
@@ -29,13 +30,10 @@ async function LoginContent({
   return (
     <main className="status-page">
       <div className="status-content auth-content">
-        <p className="eyebrow"><span /> Member area</p>
-        <h1>Member login</h1>
+        <p className="eyebrow"><span /><LocalizedText id="login.kicker" /></p>
+        <h1><LocalizedText id="login.title" /></h1>
         {!isSupabaseConfigured() && (
-          <p className="status-notice">
-            Member authentication is not configured. Set up Supabase using
-            the project instructions before enabling account access.
-          </p>
+          <LocalizedText as="p" className="status-notice" id="login.description" />
         )}
         <AuthForm errorCode={error} mode="login" />
       </div>
@@ -47,9 +45,9 @@ function LoginFallback() {
   return (
     <main className="status-page">
       <div className="status-content auth-content">
-        <p className="eyebrow"><span /> Member area</p>
-        <h1>Member login</h1>
-        <p className="status-description">Loading sign-in…</p>
+        <p className="eyebrow"><span /><LocalizedText id="login.kicker" /></p>
+        <h1><LocalizedText id="login.title" /></h1>
+        <LocalizedText as="p" className="status-description" id="login.loading" />
       </div>
     </main>
   );

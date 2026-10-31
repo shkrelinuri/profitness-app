@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { LocalizedText } from "@/components/language-provider";
 import AuthForm from "@/components/auth-form";
 
 export const metadata: Metadata = {
@@ -10,11 +11,9 @@ export default function ResetPasswordPage() {
   return (
     <main className="status-page">
       <div className="status-content auth-content">
-        <p className="eyebrow"><span /> Account security</p>
-        <h1>Reset password</h1>
-        <p className="status-description">
-          We will send a secure reset link to the email address on your account.
-        </p>
+        <p className="eyebrow"><span /><LocalizedText id="reset.kicker" /></p>
+        <h1><LocalizedText id="reset.title" /></h1>
+        <LocalizedText as="p" className="status-description" id="reset.description" />
         <AuthForm mode="reset" />
       </div>
     </main>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { LocalizedText } from "@/components/language-provider";
 import AuthForm from "@/components/auth-form";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
@@ -11,14 +12,11 @@ export default function RegisterPage() {
   return (
     <main className="status-page">
       <div className="status-content auth-content">
-        <p className="eyebrow"><span /> Join Lotus</p>
-        <h1>Create account</h1>
-        <p className="status-description">
-          Verify your email to create your member account. Account creation
-          does not activate a membership or door-access card.
-        </p>
+        <p className="eyebrow"><span /><LocalizedText id="register.kicker" /></p>
+        <h1><LocalizedText id="register.title" /></h1>
+        <LocalizedText as="p" className="status-description" id="register.description" />
         {!isSupabaseConfigured() && (
-          <p className="status-notice">Member authentication is not configured yet.</p>
+          <p className="status-notice"><LocalizedText id="register.unconfigured" /></p>
         )}
         <AuthForm mode="register" />
       </div>

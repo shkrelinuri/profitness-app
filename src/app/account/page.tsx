@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { LocalizedText } from "@/components/language-provider";
 import MemberTools from "@/components/member-tools";
 import { gym } from "@/lib/gym";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -17,12 +18,9 @@ export default async function MemberDashboardPage() {
     return (
       <main className="status-page">
         <div className="status-content">
-          <p className="eyebrow"><span /> Member area</p>
-          <h1>Accounts are being set up.</h1>
-          <p className="status-description">
-            Supabase authentication and database settings are required before
-            member accounts can be used.
-          </p>
+          <p className="eyebrow"><span /><LocalizedText id="account.area" /></p>
+          <h1><LocalizedText id="account.setupTitle" /></h1>
+          <LocalizedText as="p" className="status-description" id="account.setupDescription" />
         </div>
       </main>
     );
@@ -51,13 +49,9 @@ export default async function MemberDashboardPage() {
     return (
       <main className="status-page">
         <div className="status-content">
-          <p className="eyebrow"><span /> Member area</p>
-          <h1>Account setup is incomplete.</h1>
-          <p className="status-description">
-            The Lotus member database migration must be applied before the
-            dashboard is available. Your sign-in succeeded, but membership
-            details could not be loaded.
-          </p>
+          <p className="eyebrow"><span /><LocalizedText id="account.area" /></p>
+          <h1><LocalizedText id="account.incompleteTitle" /></h1>
+          <LocalizedText as="p" className="status-description" id="account.incompleteDescription" />
         </div>
       </main>
     );
@@ -118,60 +112,57 @@ export default async function MemberDashboardPage() {
   return (
     <main className="member-dashboard">
       <section className="member-welcome">
-        <p className="eyebrow"><span /> Private member area</p>
+        <p className="eyebrow"><span /><LocalizedText id="account.privateArea" /></p>
         <h1>
-          Welcome,
+          <LocalizedText id="account.welcome" />
           <br />
-          <em>{profile?.full_name || "Lotus member"}.</em>
+          <em>{profile?.full_name || <LocalizedText id="account.memberFallback" />}.</em>
         </h1>
-        <p>
-          Your Lotus account is private to your sign-in. Membership information
-          is shown only when verified through the authorized Maksisoft integration.
-        </p>
+        <LocalizedText as="p" id="account.description" />
       </section>
 
       <section aria-label="Membership and physical card" className="member-status-grid">
         <article className="member-status-card">
-          <span className="footer-label">MEMBERSHIP STATUS</span>
+          <span className="footer-label"><LocalizedText id="account.membershipStatus" /></span>
           <strong className={`member-status-value status-${membershipStatus}`}>
             {membershipStatus.replaceAll("_", " ")}
           </strong>
           <span>
-            {verifiedMaksisoftMembership
-              ? "Verified membership information from Maksisoft."
-              : "Membership is not verified by Maksisoft; digital privileges are unavailable."}
+            <LocalizedText id={verifiedMaksisoftMembership ? "account.verified" : "account.unverified"} />
           </span>
           {summary?.expires_at && (
-            <span>Expires {new Date(summary.expires_at).toLocaleDateString()}</span>
+            <span>
+              <LocalizedText
+                id="account.expires"
+                value={new Date(summary.expires_at).toLocaleDateString()}
+              />
+            </span>
           )}
           {!summary?.membership_id && (
-            <span>No membership is linked to this account yet.</span>
+            <span><LocalizedText id="account.noMembership" /></span>
           )}
         </article>
         <article className="member-status-card physical-card">
-          <span className="footer-label">MAKSISOFT CONNECTION</span>
+          <span className="footer-label"><LocalizedText id="account.connection" /></span>
           <strong className={`member-status-value status-${integrationStatus}`}>
             {integrationStatus.replaceAll("_", " ")}
           </strong>
           <span>
             {summary?.last_synced_at
-              ? `Last synchronized ${new Date(summary.last_synced_at).toLocaleString()}.`
-              : "No membership data has been synchronized."}
+              ? <LocalizedText id="account.lastSynced" value={new Date(summary.last_synced_at).toLocaleString()} />
+              : <LocalizedText id="account.notSynced" />}
           </span>
         </article>
       </section>
 
       {(!verifiedMaksisoftMembership || membershipStatus !== "active") && (
         <aside className="member-support-note">
-          Membership status and physical entrance access are managed in
-          Maksisoft. For help, call{" "}
+          <LocalizedText id="account.support" />{" "}
           <a href={`tel:${gym.phone.href}`}>{gym.phone.display}</a>.
         </aside>
       )}
       <aside className="member-support-note">
-        Maksisoft synchronization is unavailable until the vendor supplies an
-        authorized integration method. This site never accepts a card ID as
-        login proof and cannot unlock the gym door.
+        <LocalizedText id="account.integrationPending" />
       </aside>
 
       <MemberTools

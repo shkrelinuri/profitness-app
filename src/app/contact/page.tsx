@@ -1,40 +1,31 @@
 import type { Metadata } from "next";
+import { LocalizedText } from "@/components/language-provider";
 import ContactForm from "@/components/contact-form";
 import { gym } from "@/lib/gym";
+import { getFormspreeFormId } from "@/lib/contact";
 
 export const metadata: Metadata = {
   title: "Contact and location",
   description:
-    "Contact Lotus Gym in Tirana. View the verified address, phone number, Plus Code, and map directions.",
+    "Contact Lotus Gym in Tirana. View the address, phone number, and map directions.",
 };
-
-const mapsSearch = `${gym.address.full} ${gym.plusCode}`;
-const mapsEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(mapsSearch)}&output=embed`;
-const contactFormConfigured = Boolean(
-  process.env.RESEND_API_KEY &&
-    process.env.CONTACT_INBOX &&
-    process.env.CONTACT_FROM_EMAIL,
-);
 
 export default function ContactPage() {
   return (
     <main className="contact-page">
       <section className="contact-heading">
-        <p className="eyebrow"><span /> We&apos;re in Tirana</p>
+        <p className="eyebrow"><span /><LocalizedText id="contact.kicker" /></p>
         <h1>
-          Come find
+          <LocalizedText id="contact.heading" />
           <br />
-          <em>Lotus Gym.</em>
+          <LocalizedText as="em" id="contact.highlight" />
         </h1>
-        <p>
-          Call us to confirm opening times or ask about current membership
-          options before your visit.
-        </p>
+        <LocalizedText as="p" id="contact.intro" />
       </section>
 
       <section aria-label="Contact details" className="contact-details">
         <div>
-          <span className="footer-label">ADDRESS</span>
+          <span className="footer-label"><LocalizedText id="contact.address" /></span>
           <address>
             Lotus Gym
             <br />
@@ -44,18 +35,17 @@ export default function ContactPage() {
             <br />
             {gym.address.city}, {gym.address.postalCode}, {gym.address.country}
           </address>
-          <p className="plus-code">PLUS CODE&nbsp; {gym.plusCode}</p>
         </div>
         <div>
-          <span className="footer-label">PHONE</span>
+          <span className="footer-label"><LocalizedText id="contact.phone" /></span>
           <a className="contact-phone" href={`tel:${gym.phone.href}`}>
             {gym.phone.display}
           </a>
-          <span className="footer-label hours-label">OPENING HOURS</span>
-          <p className="contact-hours">{gym.hoursNote}</p>
+          <span className="footer-label hours-label"><LocalizedText id="contact.hours" /></span>
+          <p className="contact-hours"><LocalizedText id="footer.hours" /></p>
         </div>
         <a className="button button-lime" href={gym.mapsUrl} rel="noreferrer" target="_blank">
-          Directions in Google Maps <span aria-hidden="true">↗</span>
+          <LocalizedText id="contact.directions" /> <span aria-hidden="true">↗</span>
         </a>
       </section>
 
@@ -64,25 +54,22 @@ export default function ContactPage() {
           allowFullScreen
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
-          src={mapsEmbedUrl}
-          title="Google Maps search for Lotus Gym, Bulevardi Zogu I 1, Tirana"
+          src={gym.mapsEmbedUrl}
+          title="Google Maps location for Lotus Gym, Tirana"
         />
       </div>
 
       <section aria-labelledby="contact-form-title" className="contact-form-section">
         <div>
-          <p className="eyebrow">Get in touch</p>
+          <p className="eyebrow"><LocalizedText id="contact.message.kicker" /></p>
           <h2 id="contact-form-title">
-            Send us
+            <LocalizedText id="contact.message.first" />
             <br />
-            <em>a message.</em>
+            <LocalizedText as="em" id="contact.message.highlight" />
           </h2>
-          <p className="contact-form-intro">
-            No official email address has been supplied. The form will only
-            enable once a verified sender and recipient are configured.
-          </p>
+          <LocalizedText as="p" className="contact-form-intro" id="contact.message.description" />
         </div>
-        <ContactForm enabled={contactFormConfigured} />
+        <ContactForm enabled={Boolean(getFormspreeFormId())} />
       </section>
     </main>
   );

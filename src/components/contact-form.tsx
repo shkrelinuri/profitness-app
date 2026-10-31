@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { useLanguage } from "@/components/language-provider";
 
 type ContactFormProps = {
   enabled: boolean;
@@ -12,6 +13,7 @@ type SubmissionState = {
 } | null;
 
 export default function ContactForm({ enabled }: ContactFormProps) {
+  const { t } = useLanguage();
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<SubmissionState>(null);
 
@@ -36,8 +38,7 @@ export default function ContactForm({ enabled }: ContactFormProps) {
         setResult({
           type: "error",
           message:
-            body.error ??
-            "Your message could not be sent. Please call Lotus Gym instead.",
+            body.error ?? t("contact.form.sendError"),
         });
         return;
       }
@@ -45,13 +46,12 @@ export default function ContactForm({ enabled }: ContactFormProps) {
       form.reset();
       setResult({
         type: "success",
-        message: "Your message was sent to Lotus Gym. Thank you for getting in touch.",
+        message: t("contact.form.success"),
       });
     } catch {
       setResult({
         type: "error",
-        message:
-          "We could not reach the contact service. Please call Lotus Gym instead.",
+        message: t("contact.form.connectionError"),
       });
     } finally {
       setPending(false);
@@ -61,15 +61,12 @@ export default function ContactForm({ enabled }: ContactFormProps) {
   return (
     <form className="contact-form" onSubmit={handleSubmit}>
       {!enabled && (
-        <p className="form-notice">
-          The online contact form is not configured yet. Please call the gym
-          using the number shown on this page.
-        </p>
+        <p className="form-notice">{t("contact.form.unconfigured")}</p>
       )}
       <fieldset disabled={!enabled || pending}>
         <div className="form-grid">
           <label>
-            Name
+            {t("contact.form.name")}
             <input
               autoComplete="name"
               maxLength={100}
@@ -78,7 +75,7 @@ export default function ContactForm({ enabled }: ContactFormProps) {
             />
           </label>
           <label>
-            Email
+            {t("contact.form.email")}
             <input
               autoComplete="email"
               maxLength={254}
@@ -89,19 +86,19 @@ export default function ContactForm({ enabled }: ContactFormProps) {
           </label>
         </div>
         <label>
-          Subject
+          {t("contact.form.subject")}
           <input maxLength={160} name="subject" required />
         </label>
         <label>
-          Message
+          {t("contact.form.message")}
           <textarea maxLength={5000} minLength={10} name="message" required rows={5} />
         </label>
         <label className="honeypot" aria-hidden="true">
-          Leave this field blank
+          {t("contact.form.leaveBlank")}
           <input autoComplete="off" name="website" tabIndex={-1} />
         </label>
         <button className="button button-lime" type="submit">
-          {pending ? "Sending…" : "Send message"} <span aria-hidden="true">↗</span>
+          {pending ? t("contact.form.sending") : t("contact.form.send")} <span aria-hidden="true">↗</span>
         </button>
       </fieldset>
       {result && (
